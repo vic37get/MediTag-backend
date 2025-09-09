@@ -1,55 +1,88 @@
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import Optional
+from app.models import StatusEnum, RoleEnum
 
-class ImageBase(BaseModel):
-    file_path: str
 
-class ImageCreate(ImageBase):
+# Estudo
+class EstudoBase(BaseModel):
+    name: str
+    workspace: str
+    task: str
+    question: str
+    description: Optional[str] = None
+
+class EstudoCreate(EstudoBase):
     pass
 
-class Image(ImageBase):
+class EstudoRead(EstudoBase):
     id: int
     class Config:
         orm_mode = True
 
+# Tag
+class TagBase(BaseModel):
+    name: str
 
+class TagCreate(TagBase):
+    pass
+
+class TagRead(TagBase):
+    id: int
+    class Config:
+        from_attributes = True
+
+# Label
 class LabelBase(BaseModel):
-    label_type: str
-    value: bool
+    name: str
+    color: str
+    multi: bool = False
+    id_estudo: int
 
 class LabelCreate(LabelBase):
     pass
 
-class Label(LabelBase):
+class LabelRead(LabelBase):
     id: int
     class Config:
-        orm_mode = True
+        from_attributes = True
 
+# Amostra
+class AmostraBase(BaseModel):
+    id_estudo: int
+    image_path: str
+    report: Optional[str] = None
+    status: StatusEnum = StatusEnum.PENDING
 
-class ItemBase(BaseModel):
-    text: str
-
-class ItemCreate(ItemBase):
-    images: List[str] = [] 
+class AmostraCreate(AmostraBase):
     pass
 
-class Item(ItemBase):
+class AmostraRead(AmostraBase):
     id: int
-    images: List[Image] = []
-    labels: List[Label] = []
     class Config:
-        orm_mode = True
+        from_attributes = True
 
+# User
+class UserBase(BaseModel):
+    username: str
+    email: str
+    role: RoleEnum
 
-class DatasetBase(BaseModel):
-    name: str
-    description: Optional[str] = None
+class UserCreate(UserBase):
+    password_hash: str
 
-class DatasetCreate(DatasetBase):
+class UserRead(UserBase):
+    id: int
+    class Config:
+        from_attributes = True
+
+# AuditLog
+class AuditLogBase(BaseModel):
+    user_id: int
+
+class AuditLogCreate(AuditLogBase):
     pass
 
-class Dataset(DatasetBase):
+class AuditLogRead(AuditLogBase):
     id: int
-    items: List[Item] = []
     class Config:
-        orm_mode = True
+        from_attributes = True

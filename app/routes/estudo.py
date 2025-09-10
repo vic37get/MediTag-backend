@@ -10,8 +10,8 @@ router = APIRouter(
 )
 
 @router.post("/", response_model=schemas.EstudoRead)
-def create_estudo(estudo: schemas.EstudoCreate, db: Session = Depends(get_db)):
-    return estudo.create_estudo(db, estudo)
+def create_estudo(estudo_in: schemas.EstudoCreate, db: Session = Depends(get_db)):
+    return estudo.create_estudo(db, estudo_in)
 
 @router.get("/", response_model=list[schemas.EstudoRead])
 def read_estudos(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):

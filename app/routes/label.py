@@ -9,11 +9,11 @@ router = APIRouter(
     tags=["Labels"]
 )
 
-@router.post("/", response_model=schemas.LabelRead)
+@router.post("", response_model=schemas.LabelRead)
 def create_label(label_in: schemas.LabelCreate, db: Session = Depends(get_db)):
     return label.create_label(db, label_in)
 
-@router.get("/", response_model=list[schemas.LabelRead])
+@router.get("", response_model=list[schemas.LabelRead])
 def read_labels(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     return label.get_labels(db, skip, limit)
 

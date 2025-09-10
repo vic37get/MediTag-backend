@@ -9,11 +9,11 @@ router = APIRouter(
     tags=["Users"]
 )
 
-@router.post("/", response_model=schemas.UserCreate)
+@router.post("", response_model=schemas.UserRead)
 def create_user(user_in: schemas.UserCreate, db: Session = Depends(get_db)):
     return user.create_user(db, user_in)
 
-@router.get("/", response_model=list[schemas.UserRead])
+@router.get("", response_model=list[schemas.UserRead])
 def read_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     return user.get_users(db, skip, limit)
 

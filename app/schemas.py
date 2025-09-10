@@ -6,7 +6,7 @@ from app.models import StatusEnum, RoleEnum
 # Estudo
 class EstudoBase(BaseModel):
     name: str
-    workspace: str
+    workspace_id: int
     task: str
     question: str
     description: Optional[str] = None
@@ -17,7 +17,20 @@ class EstudoCreate(EstudoBase):
 class EstudoRead(EstudoBase):
     id: int
     class Config:
-        orm_mode = True
+        from_attributes = True
+
+# Workspace
+class WorkspaceBase(BaseModel):
+    name: str
+    description: str
+
+class WorkspaceCreate(WorkspaceBase):
+    pass
+
+class WorkspaceRead(WorkspaceBase):
+    id: int
+    class Config:
+        from_attributes = True
 
 # Tag
 class TagBase(BaseModel):
@@ -68,7 +81,7 @@ class UserBase(BaseModel):
     role: RoleEnum
 
 class UserCreate(UserBase):
-    password_hash: str
+    password: str
 
 class UserRead(UserBase):
     id: int

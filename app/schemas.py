@@ -6,18 +6,22 @@ from app.models import StatusEnum, RoleEnum
 # Estudo
 class EstudoBase(BaseModel):
     name: str
-    workspace_id: int
     task: str
+    workspace_id: int
     question: str
     description: Optional[str] = None
-
-
+    
 class EstudoCreate(EstudoBase):
     pass
 
-
 class EstudoRead(EstudoBase):
     id: int
+    workspace: str
+    tags: List[str] = []
+    labels: List[str] = []
+    users: List[str] = []
+    amostras_count: Optional[int] = 0
+    amostras_validated: Optional[int] = 0
 
     class Config:
         from_attributes = True
@@ -28,10 +32,8 @@ class WorkspaceBase(BaseModel):
     name: str
     description: str
 
-
 class WorkspaceCreate(WorkspaceBase):
     pass
-
 
 class WorkspaceRead(WorkspaceBase):
     id: int
@@ -44,10 +46,8 @@ class WorkspaceRead(WorkspaceBase):
 class TagBase(BaseModel):
     name: str
 
-
 class TagCreate(TagBase):
     pass
-
 
 class TagRead(TagBase):
     id: int
@@ -63,10 +63,8 @@ class LabelBase(BaseModel):
     multi: bool = False
     id_estudo: int
 
-
 class LabelCreate(LabelBase):
     pass
-
 
 class LabelRead(LabelBase):
     id: int
@@ -75,25 +73,23 @@ class LabelRead(LabelBase):
         from_attributes = True
 
 
-# Amostra
 class AmostraBase(BaseModel):
-    id_estudo: int
-    image_path: str
-    report: Optional[str] = None
-    status: StatusEnum = StatusEnum.PENDING
-
+    report: str | None = None
 
 class AmostraCreate(AmostraBase):
-    pass
-
+    id_estudo: int
+    image_path: str | None = None
 
 class AmostraRead(AmostraBase):
     id: int
-    labels: List[str] = []  # Nomes das labels
-    labels_ids: List[int] = []  # IDs das labels
+    id_estudo: int
+    image_path: str | None
 
     class Config:
         from_attributes = True
+
+class AmostraStatusUpdate(AmostraBase):
+    status: StatusEnum
 
 
 # User

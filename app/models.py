@@ -140,15 +140,29 @@ class Label(Base):
         uselist=True
     )
 
+class ImageAmostra(Base):
+    __tablename__ = "image_amostra"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    image_path: Mapped[str] = mapped_column(String, nullable=False, unique=True)
+    id_amostra: Mapped[int] = mapped_column(Integer, ForeignKey("amostra.id"))
+
+    amostra: Mapped['Amostra'] = relationship(
+        back_populates='images'
+    )
 
 class Amostra(Base):
     __tablename__ = "amostra"
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     id_estudo: Mapped[int] = mapped_column(Integer, ForeignKey("estudo.id"))
-    image_path: Mapped[str] = mapped_column(String, nullable=False, unique=True)
     report: Mapped[str] = mapped_column(String, nullable=True)
     status: Mapped[StatusEnum] = mapped_column(
         Enum(StatusEnum, name="status_enum"), nullable=False, default=StatusEnum.PENDING
+    )
+
+    images: Mapped[list['ImageAmostra']] = relationship(
+        back_populates='amostra',
+        cascade="all, delete-orphan",
+        uselist=True
     )
 
     labels: Mapped[list['Label']] = relationship(

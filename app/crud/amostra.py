@@ -8,7 +8,6 @@ from pydantic import parse_obj_as
 
 def get_amostras(db: Session, skip=0, limit=100):
     amostras = db.query(Amostra).offset(skip).limit(limit).all()
-    # Adicionar labels e labels_ids para cada amostra
     result = []
     for amostra in amostras:
         amostra_dict = {
@@ -56,7 +55,6 @@ def set_labels(db: Session, amostra_id: int, label_ids: list[int]):
 def get_amostra(db: Session, amostra_id: int):
     amostra = db.query(Amostra).filter(Amostra.id == amostra_id).first()
     if amostra:
-        # Criar um dicionário com os dados da amostra
         amostra_dict = {
             "id": amostra.id,
             "id_estudo": amostra.id_estudo,
@@ -72,18 +70,24 @@ def get_amostra(db: Session, amostra_id: int):
 
 def create_amostra(db: Session, amostra: AmostraCreate):
     try:
-        db_amostra = Amostra(**amostra.model_dump())
+        db_amostra = Amostra(
+            id_estudo=amostra.id_estudo,
+            report=amostra.report,
+            image_path=amostra.image_path
+        )
         db.add(db_amostra)
         db.commit()
         db.refresh(db_amostra)
-    except IntegrityError as e:
-        print(e)
+        return db_amostra
+    except IntegrityError:
         db.rollback()
-        raise HTTPException(status_code=400, detail="A amostra já existe")
+        raise HTTPException(status_code=400, detail="Amostra já existe")
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
-    return db_amostra
+
+def get_amostra_raw(db: Session, amostra_id: int):
+    return db.query(Amostra).filter(Amostra.id == amostra_id).first()
 
 
 def delete_amostra(db: Session, amostra_id: int):

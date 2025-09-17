@@ -13,7 +13,6 @@ from datetime import datetime
 from sqlalchemy.orm import relationship, DeclarativeBase, Mapped, mapped_column
 import pytz
 import enum
-
 TMZ = pytz.timezone("America/Fortaleza")
 
 
@@ -42,6 +41,7 @@ class RoleEnum(enum.Enum):
     MEDICO = "medico"
     TECNICO = "tecnico"
 
+
 label_amostra = Table(
     "label_amostra",
     Base.metadata,
@@ -62,6 +62,7 @@ estudo_user = Table(
     Column('id_estudo', ForeignKey('estudo.id'), primary_key=True),
     Column('id_user', ForeignKey('user.id'), primary_key=True)
 )
+
 
 class Estudo(Base):
     __tablename__ = "estudo"
@@ -99,6 +100,7 @@ class Estudo(Base):
     workspace: Mapped['Workspace'] = relationship(
         back_populates='estudos'
     )
+
 
 class Workspace(Base):
     __tablename__ = "workspace"
@@ -140,6 +142,7 @@ class Label(Base):
         uselist=True
     )
 
+
 class ImageAmostra(Base):
     __tablename__ = "image_amostra"
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
@@ -150,11 +153,13 @@ class ImageAmostra(Base):
         back_populates='images'
     )
 
+
 class Amostra(Base):
     __tablename__ = "amostra"
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     id_estudo: Mapped[int] = mapped_column(Integer, ForeignKey("estudo.id"))
     report: Mapped[str] = mapped_column(String, nullable=True)
+    text_report: Mapped[str] = mapped_column(String, nullable=True)
     status: Mapped[StatusEnum] = mapped_column(
         Enum(StatusEnum, name="status_enum"), nullable=False, default=StatusEnum.PENDING
     )
@@ -191,12 +196,6 @@ class User(Base):
         back_populates='users',
         uselist=True
     )
-
-
-class AuditLog(Base):
-    __tablename__ = "audit_log"
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("user.id"))
 
 
 if __name__ == "__main__":

@@ -1,26 +1,39 @@
 from sqlalchemy.orm import Session
 from app.schemas import AmostraCreate, AmostraRead
-from app.models import Amostra
+from app.models import Amostra, ImageAmostra
 from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException
-from pydantic import parse_obj_as
+from app.crud import label as label_crud
 
 
-def get_amostras(db: Session, skip=0, limit=100):
-    amostras = db.query(Amostra).offset(skip).limit(limit).all()
+def get_amostras(estudo_id, db: Session, skip=0, limit=100):
+    if estudo_id:
+        amostras = db.query(Amostra).filter(Amostra.id_estudo == estudo_id).offset(skip).limit(limit).all()
+    else:
+        amostras = db.query(Amostra).offset(skip).limit(limit).all()
     result = []
     for amostra in amostras:
         amostra_dict = {
             "id": amostra.id,
             "id_estudo": amostra.id_estudo,
-            "image_path": amostra.image_path,
+            "images": [img.id for img in amostra.images],
             "report": amostra.report,
+            "text_report": amostra.text_report,
             "status": amostra.status,
             "labels": [label.name for label in amostra.labels],
             "labels_ids": [label.id for label in amostra.labels],
         }
         result.append(amostra_dict)
     return result
+
+def set_text_report(db: Session, amostra_id: int, text_report: str):
+    amostra = get_amostra_raw(db, amostra_id)
+    if not amostra:
+        return None
+    amostra.text_report = text_report
+    db.commit()
+    db.refresh(amostra)
+    return amostra
 
 
 def set_labels(db: Session, amostra_id: int, label_ids: list[int]):
@@ -34,11 +47,9 @@ def set_labels(db: Session, amostra_id: int, label_ids: list[int]):
     Returns:
         O objeto SQLAlchemy da amostra atualizado
     """
-    from app.crud import label as label_crud
 
-    # Obter o objeto SQLAlchemy diretamente
     amostra = get_amostra_raw(db, amostra_id)
-    amostra.labels.clear()  # Limpar labels existentes
+    amostra.labels.clear() 
     if not amostra:
         return None
 
@@ -51,31 +62,18 @@ def set_labels(db: Session, amostra_id: int, label_ids: list[int]):
     db.refresh(amostra)
     return amostra
 
-
-def get_amostra(db: Session, amostra_id: int):
-    amostra = db.query(Amostra).filter(Amostra.id == amostra_id).first()
-    if amostra:
-        amostra_dict = {
-            "id": amostra.id,
-            "id_estudo": amostra.id_estudo,
-            "image_path": amostra.image_path,
-            "report": amostra.report,
-            "status": amostra.status,
-            "labels": [label.name for label in amostra.labels],
-            "labels_ids": [label.id for label in amostra.labels],
-        }
-        return amostra_dict
-    return None
-
-
-def create_amostra(db: Session, amostra: AmostraCreate):
+def create_amostra(db: Session, amostra: AmostraCreate, image_paths: list[str]):
     try:
         db_amostra = Amostra(
             id_estudo=amostra.id_estudo,
             report=amostra.report,
-            image_path=amostra.image_path
         )
         db.add(db_amostra)
+        db.commit()
+        db.refresh(db_amostra)
+        for path in image_paths:
+            img = ImageAmostra(image_path=path, id_amostra=db_amostra.id)
+            db.add(img)
         db.commit()
         db.refresh(db_amostra)
         return db_amostra
@@ -86,8 +84,30 @@ def create_amostra(db: Session, amostra: AmostraCreate):
         db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
 
-def get_amostra_raw(db: Session, amostra_id: int):
-    return db.query(Amostra).filter(Amostra.id == amostra_id).first()
+def get_amostra(db: Session, amostra_id: int):
+    amostra = db.query(Amostra).filter(Amostra.id == amostra_id).first()
+    if amostra:
+        return {
+            "id": amostra.id,
+            "id_estudo": amostra.id_estudo,
+            "report": amostra.report,
+            "status": amostra.status.value if hasattr(amostra.status, "value") else amostra.status,
+            "images": [img.id for img in amostra.images],
+        }
+    return None
+
+
+def reset_amostra(db: Session, amostra_id: int):
+    amostra = db.query(Amostra).filter(Amostra.id == amostra_id).first()
+    if amostra:
+        amostra.status = "PENDING"
+        amostra.labels.clear()
+        amostra.label_ids = []
+        amostra.text_report = None
+        db.commit()
+        db.refresh(amostra)
+        return True
+    return False
 
 
 def delete_amostra(db: Session, amostra_id: int):

@@ -3,6 +3,7 @@ from app.models import Estudo, StatusEnum
 from app.schemas import EstudoCreate
 from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException
+import os
 
 
 def get_estudos(db: Session, skip=0, limit=100):
@@ -48,6 +49,7 @@ def get_estudo(db: Session, estudo_id: int):
         "tags": [tag.name for tag in estudo.tags],
         "labels": [label.name for label in estudo.labels],
         "users": [user.username for user in estudo.users],
+        "amostras": [amostra.id for amostra in estudo.amostras],
         "amostras_count": len(estudo.amostras),
         "amostras_validated": amostras_validated
     }
@@ -66,10 +68,25 @@ def create_estudo(db: Session, estudo: EstudoCreate):
         raise HTTPException(status_code=500, detail=str(e))
     return db_estudo
 
+import shutil
+
 def delete_estudo(db: Session, estudo_id: int):
     estudo = db.query(Estudo).filter(Estudo.id == estudo_id).first()
-    if estudo:
-        db.delete(estudo)
-        db.commit()
-        return True
-    return False
+    if not estudo:
+        return False
+
+    estudo_dir = None
+    for amostra in estudo.amostras:
+        for image in amostra.images:
+            if image.image_path:
+                estudo_dir = os.path.dirname(image.image_path)
+                break
+        if estudo_dir:
+            break
+
+    if estudo_dir and os.path.exists(estudo_dir) and os.path.isdir(estudo_dir):
+        shutil.rmtree(estudo_dir)
+
+    db.delete(estudo)
+    db.commit()
+    return True

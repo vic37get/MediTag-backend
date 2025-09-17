@@ -7,12 +7,11 @@ from app.models import StatusEnum, RoleEnum
 class EstudoBase(BaseModel):
     name: str
     task: str
-    workspace_id: int
     question: str
     description: Optional[str] = None
     
 class EstudoCreate(EstudoBase):
-    pass
+    workspace_id: int
 
 class EstudoRead(EstudoBase):
     id: int
@@ -73,6 +72,7 @@ class LabelRead(LabelBase):
         from_attributes = True
 
 
+# Amostra
 class AmostraBase(BaseModel):
     report: str | None = None
 
@@ -83,13 +83,21 @@ class AmostraCreate(AmostraBase):
 class AmostraRead(AmostraBase):
     id: int
     id_estudo: int
-    image_path: str | None
+    images: List[int] = []
+    status: str
+    report: Optional[str]
+    labels: List[str] = []
+    labels_ids: List[int] = []
+    text_report: Optional[str] = None
 
     class Config:
         from_attributes = True
 
 class AmostraStatusUpdate(AmostraBase):
     status: StatusEnum
+
+class TextReportUpdate(AmostraBase):
+    text_report: str
 
 
 # User
@@ -104,22 +112,6 @@ class UserCreate(UserBase):
 
 
 class UserRead(UserBase):
-    id: int
-
-    class Config:
-        from_attributes = True
-
-
-# AuditLog
-class AuditLogBase(BaseModel):
-    user_id: int
-
-
-class AuditLogCreate(AuditLogBase):
-    pass
-
-
-class AuditLogRead(AuditLogBase):
     id: int
 
     class Config:

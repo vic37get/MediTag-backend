@@ -8,3 +8,4 @@ python-dotenv==1.1.1
 argon2_cffi==25.1.0
 passlib
 requests
+python-multipart

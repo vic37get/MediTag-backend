@@ -1,10 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, Body
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from app import schemas
 from app.crud import estudo
 from app.database import get_db
 from app.crud import tag as tag_crud
 from app.models import Estudo, Tag
+import json
 
 router = APIRouter(
     prefix="/estudos",
@@ -53,6 +55,7 @@ def add_tags_to_estudo(estudo_id: int, tag_ids: list[int] = Body(..., example=[1
         raise HTTPException(status_code=404, detail="Nenhuma tag válida encontrada")
     return added
 
+
 @router.delete("/{estudo_id}/tags/{tag_id}")
 def remove_tag_from_estudo(estudo_id: int, tag_id: int, db: Session = Depends(get_db)):
     estudo_obj = db.query(Estudo).filter(Estudo.id == estudo_id).first()
@@ -62,3 +65,29 @@ def remove_tag_from_estudo(estudo_id: int, tag_id: int, db: Session = Depends(ge
     if not ok:
         raise HTTPException(status_code=404, detail="Tag não encontrada no estudo")
     return {"message": "Tag removida com sucesso"}
+
+
+@router.get("/{estudo_id}/export")
+def export_estudo(estudo_id: int, db: Session = Depends(get_db)):
+    """
+    Exporta um estudo como pandas DataFrame serializado em JSON.
+    
+    Retorna um JSON com as seguintes colunas:
+    - amostra_id: ID da amostra
+    - imagem_path: Caminho para a imagem
+    - imagem_pil_b64: Imagem em formato base64 (para reconstruir PIL Image)
+    - achados: Labels/achados encontrados (separados por vírgula)
+    - comentarios: Comentários feitos (text_report)
+    - relatorio: Relatório/laudo (report)
+    - status: Status da amostra
+    """
+    df_export = estudo.export_estudo_to_dataframe(db, estudo_id)
+    if df_export is None:
+        raise HTTPException(status_code=404, detail="Estudo não encontrado")
+    df_export = df_export.drop(columns=['imagem_pil'])
+    return JSONResponse(content={
+        "estudo_id": estudo_id,
+        "total_registros": len(df_export),
+        "colunas": list(df_export.columns),
+        "dados": df_export.to_dict('records')
+    })

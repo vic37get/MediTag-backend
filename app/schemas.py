@@ -93,6 +93,14 @@ class AmostraRead(AmostraBase):
     class Config:
         from_attributes = True
 
+class AmostraUpdate(BaseModel):
+    report: Optional[str] = None
+    text_report: Optional[str] = None
+    status: Optional[StatusEnum] = None
+    
+    class Config:
+        from_attributes = True
+
 class AmostraStatusUpdate(AmostraBase):
     status: StatusEnum
 

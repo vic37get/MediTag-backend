@@ -84,6 +84,29 @@ def create_amostra(db: Session, amostra: AmostraCreate, image_paths: list[str]):
         db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
 
+def update_amostra(db: Session, amostra_id: int, update_data: dict):
+    """Atualiza os campos de uma amostra.
+    
+    Args:
+        db: Sessão do banco de dados
+        amostra_id: ID da amostra a ser atualizada
+        update_data: Dicionário com os campos a serem atualizados
+        
+    Returns:
+        O objeto amostra atualizado, ou None se não encontrar
+    """
+    amostra = get_amostra_raw(db, amostra_id)
+    if not amostra:
+        return None
+    
+    for field, value in update_data.items():
+        if hasattr(amostra, field):
+            setattr(amostra, field, value)
+    
+    db.commit()
+    db.refresh(amostra)
+    return amostra
+
 def get_amostra(db: Session, amostra_id: int):
     amostra = db.query(Amostra).filter(Amostra.id == amostra_id).first()
     if amostra:

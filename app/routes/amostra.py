@@ -10,7 +10,7 @@ from app.utils import save_upload_file, remove_file
 from fastapi.responses import FileResponse
 import os
 from typing import List
-from app.schemas import AmostraStatusUpdate, TextReportUpdate
+from app.schemas import AmostraStatusUpdate, AmostraUpdate, TextReportUpdate
 
 router = APIRouter(prefix="/amostras", tags=["Amostras"])
 
@@ -225,3 +225,19 @@ def update_amostra_status(
     db.refresh(db_amostra)
 
     return amostra.get_amostra(db, amostra_id)
+
+# Endpoint para atualizar campos específicos de uma amostra
+@router.patch("/{amostra_id}", response_model=schemas.AmostraRead)
+def update_amostra(
+    amostra_id: int, field_update: AmostraUpdate, db: Session = Depends(get_db)
+):
+    update_data = {k: v for k, v in field_update.model_dump().items() if v is not None}
+    
+    if not update_data:
+        raise HTTPException(status_code=400, detail="Nenhum campo válido para atualização")
+    
+    updated_amostra = amostra_crud.update_amostra(db, amostra_id, update_data)
+    if not updated_amostra:
+        raise HTTPException(status_code=404, detail="Amostra não encontrada")
+    
+    return amostra_crud.get_amostra(db, amostra_id)

@@ -1,8 +1,10 @@
+from sqlalchemy import text
 import os
 import shutil
 import requests
 from sqlalchemy.orm import Session
-from app.models import Workspace, Estudo, Amostra, StatusEnum, Label
+from app.models import Workspace, Estudo, Amostra, StatusEnum, Label, Tag, Base
+from sqlalchemy import create_engine
 from app.database import SessionLocal, Base, engine
 
 # URLs de imagens de raio-x (livres para uso educacional)
@@ -26,6 +28,7 @@ def baixar_imagem(url, save_path):
 
 def popular_mock():
     db: Session = SessionLocal()
+
     try:
         # Limpa banco e uploads (apenas para dev!)
         Base.metadata.drop_all(bind=engine)
@@ -48,8 +51,8 @@ def popular_mock():
             name="Raio-X de Tórax Adulto",
             workspace_id=ws1.id,
             task="classificacao",
-            question="O laudo apresenta sinais de pneumonia?",
-            description="Estudo para classificação de pneumonia em adultos."
+            question="Considerando as imagens de raio-X de tórax (projeções frontal e lateral) apresentadas, você concorda que o laudo fornecido descreve corretamente os achados?",
+            description="Estudo para classificação de achados em raio-x do tórax de adultos."
         )
         estudo2 = Estudo(
             name="Raio-X de Mão Adulto",
@@ -65,18 +68,42 @@ def popular_mock():
             question="Há sinais de bronquiolite?",
             description="Estudo para análise de bronquiolite em crianças."
         )
+
+
+
         db.add_all([estudo1, estudo2, estudo3])
         db.commit()
         db.refresh(estudo1)
         db.refresh(estudo2)
         db.refresh(estudo3)
 
+        # Tags para cada estudo
+        
+        tags_estudo = {
+            estudo1.id: ["adulto", "torax"],
+            estudo2.id: ["adulto", "mao"],
+            estudo3.id: ["infantil", "torax"],
+        }
+
+        for estudo_id, tag_names in tags_estudo.items():
+            for name in tag_names:
+                tag = db.query(Tag).filter(Tag.name == name).first()
+                if not tag:
+                    tag = Tag(name=name)
+                    db.add(tag)
+                    db.commit()
+                    db.refresh(tag)
+                estudo = db.query(Estudo).filter(Estudo.id == estudo_id).first()
+                if tag not in estudo.tags:
+                    estudo.tags.append(tag)
+            db.commit()
+
         # Labels para cada estudo
         labels_estudo = {
             estudo1.id: [
-                ("Normal", "#4CAF50"),
-                ("Pneumonia", "#F44336"),
-                ("Outros achados", "#FFC107"),
+                ("Correto", "#4CAF50"),
+                ("Errado", "#F44336"),
+                ("Neutro", "#9E9E9E"),
             ],
             estudo2.id: [
                 ("Sem fratura", "#2196F3"),

@@ -20,11 +20,13 @@ XRAY_IMAGES = [
     "https://www.residenciapediatrica.com.br/Content//images/v7s1a06-fig04.jpg",
 ]
 
+
 def baixar_imagem(url, save_path):
     resp = requests.get(url, timeout=10)
     resp.raise_for_status()
     with open(save_path, "wb") as f:
         f.write(resp.content)
+
 
 def popular_mock():
     db: Session = SessionLocal()
@@ -39,8 +41,14 @@ def popular_mock():
         os.makedirs(upload_dir, exist_ok=True)
 
         # Workspaces
-        ws1 = Workspace(name="Radiologia Geral", description="Workspace para exames gerais de raio-x")
-        ws2 = Workspace(name="Radiologia Pediátrica", description="Workspace para exames pediátricos")
+        ws1 = Workspace(
+            name="Radiologia Geral",
+            description="Workspace para exames gerais de raio-x",
+        )
+        ws2 = Workspace(
+            name="Radiologia Pediátrica",
+            description="Workspace para exames pediátricos",
+        )
         db.add_all([ws1, ws2])
         db.commit()
         db.refresh(ws1)
@@ -52,24 +60,22 @@ def popular_mock():
             workspace_id=ws1.id,
             task="classificacao",
             question="Considerando as imagens de raio-X de tórax (projeções frontal e lateral) apresentadas, você concorda que o laudo fornecido descreve corretamente os achados?",
-            description="Estudo para classificação de achados em raio-x do tórax de adultos."
+            description="Estudo para classificação de achados em raio-x do tórax de adultos.",
         )
         estudo2 = Estudo(
             name="Raio-X de Mão Adulto",
             workspace_id=ws1.id,
             task="classificacao",
             question="Há fratura visível na mão?",
-            description="Estudo para detecção de fraturas em mãos adultas."
+            description="Estudo para detecção de fraturas em mãos adultas.",
         )
         estudo3 = Estudo(
             name="Raio-X de Tórax Infantil",
             workspace_id=ws2.id,
             task="classificacao",
             question="Há sinais de bronquiolite?",
-            description="Estudo para análise de bronquiolite em crianças."
+            description="Estudo para análise de bronquiolite em crianças.",
         )
-
-
 
         db.add_all([estudo1, estudo2, estudo3])
         db.commit()
@@ -78,7 +84,7 @@ def popular_mock():
         db.refresh(estudo3)
 
         # Tags para cada estudo
-        
+
         tags_estudo = {
             estudo1.id: ["adulto", "torax"],
             estudo2.id: ["adulto", "mao"],
@@ -126,24 +132,29 @@ def popular_mock():
         # Amostras e imagens
         estudo_imgs = {
             estudo1.id: XRAY_IMAGES[:2],  # Tórax adulto
-            estudo2.id: XRAY_IMAGES[2:4], # Mão adulto
+            estudo2.id: XRAY_IMAGES[2:4],  # Mão adulto
             estudo3.id: XRAY_IMAGES[4:],  # Tórax infantil
         }
         for estudo in [estudo1, estudo2, estudo3]:
             estudo_dir = os.path.join(upload_dir, f"estudo_{estudo.id}")
             os.makedirs(estudo_dir, exist_ok=True)
             for i in range(1, 6):
+                import random as rd, json
+
+                laudos = json.load(open("laudos_mock.json", "r"))
+                laudo = rd.choice(laudos)
                 amostra = Amostra(
                     id_estudo=estudo.id,
-                    report=f"Laudo simulado {i} para {estudo.name}",
-                    status=StatusEnum.PENDING
+                    report=laudo["report"],
                 )
                 db.add(amostra)
                 db.commit()
                 db.refresh(amostra)
                 # Baixa e associa 2 imagens por amostra
                 for idx, img_url in enumerate(estudo_imgs[estudo.id]):
-                    img_path = os.path.join(estudo_dir, f"amostra_{amostra.id}_img{idx+1}.jpg")
+                    img_path = os.path.join(
+                        estudo_dir, f"amostra_{amostra.id}_img{idx+1}.jpg"
+                    )
                     try:
                         baixar_imagem(img_url, img_path)
                     except Exception as e:
@@ -151,6 +162,7 @@ def popular_mock():
                         continue
                     # Cria registro da imagem
                     from app.models import ImageAmostra
+
                     db.add(ImageAmostra(image_path=img_path, id_amostra=amostra.id))
                 db.commit()
 
@@ -162,6 +174,7 @@ def popular_mock():
 
     finally:
         db.close()
+
 
 if __name__ == "__main__":
     popular_mock()

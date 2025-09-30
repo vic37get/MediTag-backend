@@ -1,0 +1,17 @@
+[
+    {
+        "id": 1,
+        "id_amostra": 1,
+        "report": "O exame de radiografia de tórax em projeções póstero-anterior e perfil evidencia pulmões bem expansíveis e com transparência preservada, sem sinais de consolidação, nódulos ou massas. O padrão broncovascular apresenta-se mantido, não havendo indícios de congestão ou alterações intersticiais relevantes.\n\nAs pleuras encontram-se íntegras, sem espessamentos ou coleções líquidas, e não há sinais de pneumotórax. O mediastino e as regiões hilares mantêm contornos regulares, sem alargamentos ou desvios. A silhueta cardíaca está dentro dos limites habituais para o exame radiográfico.\n\nOs diafragmas apresentam-se bem definidos, com cúpulas em posição anatômica e seios costofrênicos livres. As estruturas ósseas da parede torácica, assim como as partes moles adjacentes, não demonstram alterações significativas.\n\nImpressão diagnóstica: Exame radiográfico do tórax sem alterações significativas detectáveis."
+    },
+    {
+        "id": 2,
+        "id_amostra": 2,
+        "report": "Tomografia computadorizada do tórax sem contraste endovenoso revela múltiplos nódulos pulmonares bilaterais, com tamanhos variando entre 0,8 e 2,3 cm, distribuídos pelos terços médio e inferior de ambos os pulmões. O maior nódulo localiza-se no segmento posterior do lobo superior direito, medindo aproximadamente 2,3 cm em seu maior eixo.\n\nObserva-se também discreta irregularidade do contorno pleural à direita, com pequeno espessamento pleural focal. Há sinais de atelectasia subsegmentar no lobo inferior esquerdo. Os linfonodos hilares bilaterais apresentam-se discretamente aumentados, com o maior medindo 1,2 cm no hilo direito.\n\nO mediastino encontra-se centrado, sem massas ou adenomegalias significativas. Não há derrame pleural ou pneumotórax. As estruturas cardiovasculares estão preservadas.\n\nImpressão diagnóstica: Múltiplos nódulos pulmonares bilaterais. Linfonodomegalia hilar discreta. Sugestivo de processo neoplásico secundário. Recomenda-se correlação clínica e investigação complementar."
+    },
+    {
+        "id": 3,
+        "id_amostra": 3,
+        "report": "Radiografia simples de tórax em incidência póstero-anterior demonstra opacidade heterogênea de densidade aumentada no terço inferior do hemitórax direito, com broncograma aéreo associado, compatível com consolidação pulmonar. O processo se estende desde a região para-hilar até a periferia, respeitando parcialmente os limites anatômicos do lobo inferior direito.\n\nObserva-se também discreta elevação da cúpula diafragmática direita e redução do volume pulmonar ipsilateral. O seio costofrênico direito apresenta-se velado, sugerindo pequeno derrame pleural associado. O pulmão esquerdo mantém transparência preservada, sem alterações significativas.\n\nO mediastino encontra-se discretamente desviado para a direita, secundário à perda volumétrica. A silhueta cardíaca mantém dimensões habituais. Não há sinais de pneumotórax.\n\nAs estruturas ósseas visualizadas não apresentam alterações detectáveis no método.\n\nImpressão diagnóstica: Consolidação pulmonar no lobo inferior direito com pequeno derrame pleural associado. Achados compatíveis com pneumonia bacteriana. Correlação clínica recomendada."
+    }
+]

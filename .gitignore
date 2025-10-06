@@ -5,7 +5,8 @@ __pycache__/
 *.png
 # C extensions
 *.so
-
+alembic/
+*.ini
 # Distribution / packaging
 .Python
 build/

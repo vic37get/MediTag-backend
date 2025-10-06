@@ -158,6 +158,7 @@ class Amostra(Base):
     __tablename__ = "amostra"
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     id_estudo: Mapped[int] = mapped_column(Integer, ForeignKey("estudo.id"))
+    id_user: Mapped[int] = mapped_column(Integer, ForeignKey("user.id"), nullable=True)
     report: Mapped[str] = mapped_column(String, nullable=True)
     text_report: Mapped[str] = mapped_column(String, nullable=True)
     status: Mapped[StatusEnum] = mapped_column(
@@ -180,20 +181,30 @@ class Amostra(Base):
         back_populates='amostras'
     )
 
+    user: Mapped['User'] = relationship(
+        back_populates='amostras'
+    )
+
 
 class User(Base):
     __tablename__ = "user"
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     username: Mapped[str] = mapped_column(String, nullable=False, unique=True)
     email: Mapped[str] = mapped_column(String, nullable=False, unique=True)
-    password_hash: Mapped[str] = mapped_column(String, nullable=False)
+    hashed_password: Mapped[str] = mapped_column(String, nullable=False)
     role: Mapped[RoleEnum] = mapped_column(
         Enum(RoleEnum, name="role_enum"), nullable=False
     )
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
 
     estudos: Mapped[list['Estudo']] = relationship(
         secondary=estudo_user,
         back_populates='users',
+        uselist=True
+    )
+
+    amostras: Mapped[list['Amostra']] = relationship(
+        back_populates='user',
         uselist=True
     )
 

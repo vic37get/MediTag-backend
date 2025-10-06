@@ -1,6 +1,7 @@
 import os
 import uuid
 from fastapi import UploadFile, HTTPException
+from passlib.context import CryptContext
 
 ROOT_DIR = os.path.abspath(os.getcwd())
 UPLOAD_DIR = os.getenv("UPLOAD_DIR", "uploads")
@@ -8,6 +9,13 @@ UPLOAD_DIR_PATH = os.path.join(ROOT_DIR, UPLOAD_DIR)
 os.makedirs(UPLOAD_DIR_PATH, exist_ok=True)
 
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg"}
+pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
+
+def hash_password(password: str) -> str:
+    return pwd_context.hash(password)
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    return pwd_context.verify(plain_password, hashed_password)
 
 def allowed_file(filename: str) -> bool:
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS

@@ -1,0 +1,15 @@
+datasets
+pandas
+fastapi
+SQLAlchemy
+pytz
+uvicorn
+psycopg2-binary
+pydantic
+python-dotenv
+argon2_cffi
+passlib
+requests
+python-multipart
+Pillow
+alembic

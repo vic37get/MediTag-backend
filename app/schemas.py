@@ -112,12 +112,16 @@ class TextReportUpdate(AmostraBase):
 class UserBase(BaseModel):
     username: str
     email: str
+
+class UserCreate(BaseModel):
+    username: str
+    email: str
+    password: str
     role: RoleEnum
 
-
-class UserCreate(UserBase):
+class UserLogin(BaseModel):
+    email: str
     password: str
-
 
 class UserRead(UserBase):
     id: int

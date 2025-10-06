@@ -5,7 +5,7 @@ import requests
 from sqlalchemy.orm import Session
 from app.models import Workspace, Estudo, Amostra, StatusEnum, Label, Tag, Base
 from sqlalchemy import create_engine
-from app.database import SessionLocal, Base, engine
+from app.database import SessionLocal, engine
 
 # URLs de imagens de raio-x (livres para uso educacional)
 XRAY_IMAGES = [

@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional, List
 from app.models import StatusEnum, RoleEnum
 
@@ -16,9 +16,9 @@ class EstudoCreate(EstudoBase):
 class EstudoRead(EstudoBase):
     id: int
     workspace: str
-    tags: List[str] = []
-    labels: List[str] = []
-    users: List[str] = []
+    tags: List[str] = Field(default_factory=list)
+    labels: List[str] = Field(default_factory=list)
+    users: List[str] = Field(default_factory=list)
     amostras_count: Optional[int] = 0
     amostras_validated: Optional[int] = 0
 
@@ -74,21 +74,21 @@ class LabelRead(LabelBase):
 
 # Amostra
 class AmostraBase(BaseModel):
-    report: str | None = None
+    report: Optional[str] = None
 
 class AmostraCreate(AmostraBase):
     id_estudo: int
-    image_path: str | None = None
+    image_path: Optional[str] = None
 
 class AmostraRead(AmostraBase):
     id: int
     id_estudo: int
     id_user: Optional[int] = None
-    images: List[int] = []
+    images: List[int] = Field(default_factory=list)
     status: str
     report: Optional[str]
-    labels: List[str] = []
-    labels_ids: List[int] = []
+    labels: List[str] = Field(default_factory=list)
+    labels_ids: List[int] = Field(default_factory=list)
     text_report: Optional[str] = None
 
     class Config:
@@ -98,6 +98,7 @@ class AmostraUpdate(BaseModel):
     report: Optional[str] = None
     text_report: Optional[str] = None
     status: Optional[StatusEnum] = None
+    labels: Optional[List[int]] = None
     
     class Config:
         from_attributes = True

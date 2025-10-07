@@ -39,7 +39,10 @@ def create_access_token(
     expire = datetime.now(tz=timezone.utc) + (expires_delta or timedelta(minutes=int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))))
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, os.getenv("SECRET_KEY"), algorithm=os.getenv("ALGORITHM"))
-    return encoded_jwt
+    return {
+        "access_token": encoded_jwt,
+        "expires_in": expire
+    }
 
 @router.post("/login")
 def login_user(
@@ -50,5 +53,11 @@ def login_user(
     if not user or not verify_password(form_data.password, user.hashed_password):
         raise HTTPException(status_code=401, detail="Credenciais inválidas.")
 
-    access_token = create_access_token(data={"sub": user.username})
-    return {"access_token": access_token, "token_type": "bearer"}
+    token_data = create_access_token(data={"sub": user.username})
+
+    return {
+        "access_token": token_data["access_token"], 
+        "expires_in": token_data["expires_in"], 
+        "token_type": "bearer", 'user': user.username, 
+        'role': user.role
+        }

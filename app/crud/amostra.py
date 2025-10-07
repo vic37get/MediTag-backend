@@ -13,7 +13,6 @@ def get_amostras(estudo_id, db: Session, skip=0, limit=100):
         amostras = db.query(Amostra).offset(skip).limit(limit).all()
     result = []
     for amostra in amostras:
-        print(amostra.id_user)
         amostra_dict = {
             "id": amostra.id,
             "id_user": amostra.id_user,
@@ -92,12 +91,24 @@ def update_amostra(db: Session, amostra_id: int, update_data: dict, user_id: int
         return None
 
     for field, value in update_data.items():
+        if field == "labels" or field == "labels_ids":
+            continue 
         if hasattr(amostra, field):
             setattr(amostra, field, value)
-    print(user_id)
+
+    label_ids = update_data.get("labels") or update_data.get("labels_ids")
+    print(label_ids)
+    if label_ids is not None:
+        amostra.labels.clear()
+        for label_id in label_ids:
+            db_label = label_crud.get_label_raw(db, label_id)
+            print(db_label)
+            if db_label and db_label not in amostra.labels:
+                amostra.labels.append(db_label)
+
     if user_id is not None:
         amostra.id_user = user_id
-
+    print(amostra.labels)
     db.commit()
     db.refresh(amostra)
     return amostra

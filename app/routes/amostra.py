@@ -132,26 +132,6 @@ def add_labels_to_amostra(
         raise HTTPException(status_code=404, detail="Amostra não encontrada")
     return amostra.get_amostra(db, db_amostra.id)
 
-# @router.patch("/{amostra_id}/status", response_model=schemas.AmostraRead)
-# def update_amostra_status(
-#     amostra_id: int, 
-#     status_update: AmostraStatusUpdate, 
-#     db: Session = Depends(get_db),
-#     current_user: User = Depends(get_current_user)
-#     ):
-#     """
-#     Endpoint para atualizar o status de uma amostra.
-#     """
-#     db_amostra = amostra.get_amostra_raw(db, amostra_id)
-#     if not db_amostra:
-#         raise HTTPException(status_code=404, detail="Amostra não encontrada")
-
-#     db_amostra.status = status_update.status
-#     db.commit()
-#     db.refresh(db_amostra)
-
-#     return amostra.get_amostra(db, amostra_id)
-
 @router.patch("/{amostra_id}", response_model=schemas.AmostraRead)
 def update_amostra(
     amostra_id: int, 

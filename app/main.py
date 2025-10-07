@@ -6,7 +6,8 @@ from app.routes import (
     amostra,
     workspace,
     tag,
-    auth
+    auth,
+    sdk
 )
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -28,3 +29,4 @@ app.include_router(workspace.router)
 app.include_router(label.router)
 app.include_router(amostra.router)
 app.include_router(tag.router)
+app.include_router(sdk.router)

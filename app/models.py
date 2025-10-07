@@ -195,7 +195,7 @@ class User(Base):
     role: Mapped[RoleEnum] = mapped_column(
         Enum(RoleEnum, name="role_enum"), nullable=False
     )
-    is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
 
     estudos: Mapped[list['Estudo']] = relationship(
         secondary=estudo_user,

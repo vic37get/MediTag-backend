@@ -13,8 +13,10 @@ def get_amostras(estudo_id, db: Session, skip=0, limit=100):
         amostras = db.query(Amostra).offset(skip).limit(limit).all()
     result = []
     for amostra in amostras:
+        print(amostra.id_user)
         amostra_dict = {
             "id": amostra.id,
+            "id_user": amostra.id_user,
             "id_estudo": amostra.id_estudo,
             "images": [img.id for img in amostra.images],
             "report": amostra.report,
@@ -84,25 +86,18 @@ def create_amostra(db: Session, amostra: AmostraCreate, image_paths: list[str]):
         db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
 
-def update_amostra(db: Session, amostra_id: int, update_data: dict):
-    """Atualiza os campos de uma amostra.
-    
-    Args:
-        db: Sessão do banco de dados
-        amostra_id: ID da amostra a ser atualizada
-        update_data: Dicionário com os campos a serem atualizados
-        
-    Returns:
-        O objeto amostra atualizado, ou None se não encontrar
-    """
+def update_amostra(db: Session, amostra_id: int, update_data: dict, user_id: int = None):
     amostra = get_amostra_raw(db, amostra_id)
     if not amostra:
         return None
-    
+
     for field, value in update_data.items():
         if hasattr(amostra, field):
             setattr(amostra, field, value)
-    
+    print(user_id)
+    if user_id is not None:
+        amostra.id_user = user_id
+
     db.commit()
     db.refresh(amostra)
     return amostra
@@ -112,6 +107,7 @@ def get_amostra(db: Session, amostra_id: int):
     if amostra:
         return {
             "id": amostra.id,
+            "id_user": amostra.id_user,
             "id_estudo": amostra.id_estudo,
             "report": amostra.report,
             "status": amostra.status.value if hasattr(amostra.status, "value") else amostra.status,

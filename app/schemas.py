@@ -83,6 +83,7 @@ class AmostraCreate(AmostraBase):
 class AmostraRead(AmostraBase):
     id: int
     id_estudo: int
+    id_user: Optional[int] = None
     images: List[int] = []
     status: str
     report: Optional[str]

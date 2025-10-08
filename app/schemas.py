@@ -130,3 +130,15 @@ class UserRead(UserBase):
 
     class Config:
         from_attributes = True
+
+class DatasetCreate(BaseModel):
+    name: str
+    settings: dict
+    question: str
+    description: Optional[str] = None
+    workspace: Optional[str] = None
+
+class DatasetLog(BaseModel):
+    dataset_name: str
+    records: List[dict]
+    workspace: Optional[str] = None

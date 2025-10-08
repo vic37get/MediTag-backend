@@ -1,7 +1,22 @@
 import requests
 
+class MediTagClient:
+    def __init__(self):
+        self.api_url = None
+        self.token = None
+        self.user = None
+        self.role = None
 
-import requests
+    def is_authenticated(self):
+        return self.token is not None
+
+client = MediTagClient()
+
+def get_auth_headers():
+    if not client.is_authenticated():
+        raise RuntimeError("Você precisa se autenticar primeiro usando mt.init(...)")
+    return {"Authorization": f"Bearer {client.token}"}
+
 
 def init(api_url: str, user: str, password: str = None) -> dict | None:
     url = f"{api_url.rstrip('/')}/sdk/authenticate"
@@ -9,19 +24,19 @@ def init(api_url: str, user: str, password: str = None) -> dict | None:
         response = requests.post(url, data={"username": user, "password": password}, timeout=10)
     except requests.ConnectionError:
         print(f"[ERRO] Não foi possível conectar ao servidor em {url}. Verifique se o backend está rodando e acessível.")
-        return None
     except requests.Timeout:
         print(f"[ERRO] Timeout ao tentar conectar ao servidor em {url}.")
-        return None
     except Exception as e:
         print(f"[ERRO] Erro inesperado: {e}")
-        return None
 
     if response.status_code == 200:
         try:
             data = response.json()
             print(f"[OK] Autenticado como '{user}'.")
-            return data
+            client.api_url = api_url.rstrip("/")
+            client.token = data.get("access_token")
+            client.user = data.get("user")
+            client.role = data.get("role")
         except Exception:
             print("[ERRO] Erro ao decodificar resposta do servidor.")
             return None
@@ -31,7 +46,6 @@ def init(api_url: str, user: str, password: str = None) -> dict | None:
         print(f"[ERRO] Endpoint '/sdk/authenticate' não encontrado em {api_url}.")
     else:
         print(f"[ERRO] Erro {response.status_code}: {response.text}")
-    return None
 
 class Settings:
     def __init__(self, label_schema: list[str] = None):
@@ -42,27 +56,58 @@ def configure_dataset(
         name: str,
         settings: Settings,
         workspace: str = None,
-        tags: list[str] = None,
+        question: str = None,
+        description: str = None
         ) -> None:
-    ...
+    
+    url = f"{client.api_url}/sdk/configure-dataset"
+    headers = get_auth_headers()
+    payload = {
+        "name": name,
+        "settings": settings.__dict__,
+        "workspace": workspace,
+        "question": question,
+        "description": description
+    }
+    response = requests.post(url, json=payload, headers=headers)
+    if response.status_code == 200:
+        print("Dataset configurado com sucesso!")
+        return response.json()
+    else:
+        print(f"Erro ao configurar dataset: {response.status_code} - {response.text}")
+        return None
 
-def log(records: list, dataset_name: str, workspace: str = None, tags: list[str] = None) -> None:
-    ...
+def log(records: list, dataset_name: str, workspace: str = None) -> None:
+    url = f"{client.api_url}/sdk/log"
+    headers = get_auth_headers()
+    payload = {
+        "records": [record.__dict__ for record in records],
+        "dataset_name": dataset_name,
+        "workspace": workspace
+    }
+    response = requests.post(url, json=payload, headers=headers)
+    if response.status_code == 200:
+        print("Logs registrados com sucesso!")
+        return response.json()
+    else:
+        print(f"Erro ao registrar logs: {response.status_code} - {response.text}")
+        return None
 
 class ImageClassificationSettings(Settings):
-    def __init__(self, labels: list[str]):
+    def __init__(self, labels: list[str], tags: list[str] = None):
         super().__init__(label_schema=list(set(labels)))
         self.task = "image_classification"
+        self.tags = tags or []
 
 class ImageClassificationRecord:
     def __init__(
             self,
-            text_report: str,
+            report: str,
             images: list[str],
             status: str = "pending",
             ):
         self.status = status
-        self.text_report = text_report
+        self.report = report
         self.images = images if images is not None else []
 
 

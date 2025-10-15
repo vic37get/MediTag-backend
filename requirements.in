@@ -13,3 +13,4 @@ requests
 python-multipart
 Pillow
 alembic
+python-jose[cryptography]

@@ -1,3 +1,6 @@
+# no app.py (logo no início)
+import sys, os
+sys.path.append(os.path.join(os.path.dirname(__file__), "backend"))
 from fastapi import FastAPI
 from app.database import Base, engine
 from app.routes import (

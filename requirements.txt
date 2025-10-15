@@ -4,6 +4,11 @@
 #
 #    pip-compile requirements.in
 #
+# CC
+pandas == 2.3.3
+    # via
+    #   -r requirements.in
+    #   datasets
 aiohappyeyeballs==2.6.1
     # via aiohttp
 aiohttp==3.12.15
